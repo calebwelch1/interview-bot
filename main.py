@@ -3,16 +3,20 @@
 # save chat history to send back and forth for context
 
 from fastapi import FastAPI, UploadFile
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 
 import json
 import os
+import requests
 import openai
 from openai import OpenAI
 load_dotenv()
 
 openai_apikey = os.getenv("OPEN_AI_KEY")
 openai_orgkey = os.getenv("OPEN_AI_ORG")
+elevenlabs_key = os.getenv("ELEVENLABS_KEY")
+
 app = FastAPI()
 
 # to run server
@@ -31,6 +35,14 @@ async def root():
 async def post_audio(file: UploadFile):
     user_message = transcribe_audio(file)
     chat_response = get_chat_response(user_message)
+    audio_output = text_to_speech(chat_response)
+
+    def iterfile():  # 
+        # with open(some_file_path, mode="rb") as file_like:  # 
+        #     yield from file_like  # 
+        yield audio_output
+
+    return StreamingResponse(iterfile(), media_type="audio/mpeg")
    
 
 # post to localhost:8000/talk with audio file in body to test
@@ -73,6 +85,7 @@ def get_chat_response(user_message):
     # print(parsed_gpt_response)
     print(user_message, "stop")
     save_messages(user_message, parsed_gpt_response)
+    return parsed_gpt_response
 
 def load_messages():
     messages = []
@@ -91,7 +104,7 @@ def load_messages():
                 messages.append(item)
     else:
         messages.append(
-            {"role": "system", "content": "Your are an interviewer who is interviewing the user for a front-end React developer position. Ask short questions that are relevant to a junior level developer. Your name is Greg. Keep your responses under 30 words and be funny sometimes."}
+            {"role": "system", "content": "Your are an interviewer who is interviewing the user for a front-end React developer position. Ask short questions that are relevant to a junior level developer. Your name is Matilda. Keep your responses under 30 words and be funny sometimes."}
         )
     return messages
 
@@ -103,3 +116,35 @@ def save_messages(user_message, gpt_response):
     messages.append({"role": "assistant", "content": gpt_response})
     with open(file, 'w') as f:
         json.dump(messages, f)
+
+# text to speech
+
+def text_to_speech(text):
+    # https://api.elevenlabs.io/docs
+    body = {
+        "text": text,
+        "model_id": "eleven_monolingual_v1",
+        "voice_settings": {
+            "stability": 0,
+            "similarity_boost": 0,
+            "style": 0,
+            "use_speaker_boost": True
+        }
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "accept": "audio/mpeg",
+        "xi-api-key": elevenlabs_key
+    }
+
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/XrExE9yKIg1WjnnlVkGX"
+
+    try:
+        response = requests.post(url, json=body, headers=headers)
+        if response.status_code == 200:
+            return response.content
+        else:
+            print('something went wrong!')
+    except Exception as e:
+        print(e)
