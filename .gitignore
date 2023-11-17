@@ -28,5 +28,6 @@ coverage
 *.sln
 *.sw?
 .env
+*.mp3
 notes.md
 test_audio.mp3
