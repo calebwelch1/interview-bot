@@ -53,6 +53,7 @@ async def create_upload_file(file: UploadFile):
 
 # function definitions
 
+# transcribe the input audio into text for chatgpt
 def transcribe_audio(file):
     audio_file= open(file.filename, "rb")
     transcript = client.audio.transcriptions.create(
@@ -83,7 +84,7 @@ def get_chat_response(user_message):
     # response looks like this, won't allow accessing index with ["choices"] need . notation
     # choices=[Choice(finish_reason='stop', index=0, message=ChatCompletionMessage(content="Hey there!")"
     # print(parsed_gpt_response)
-    print(user_message, "stop")
+    # print(user_message, "stop")
     save_messages(user_message, parsed_gpt_response)
     return parsed_gpt_response
 
@@ -117,7 +118,7 @@ def save_messages(user_message, gpt_response):
     with open(file, 'w') as f:
         json.dump(messages, f)
 
-# text to speech
+# text to speech for the chatbot
 
 def text_to_speech(text):
     # https://api.elevenlabs.io/docs

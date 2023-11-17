@@ -8,12 +8,10 @@ interface MyObject {
 
 export default {
   data() {
-    return { 
-      showAbout:false,
+    return {
       windowWidth: window.innerWidth,
       currentArr: [] as MyObject[],
-      queue: [] as MyObject[],
-      title: '2023',
+      recordingInProgress: false,
      }
   },
   mounted() {
@@ -21,7 +19,27 @@ export default {
   beforeDestroy() { 
     window.removeEventListener('resize', this.onResize); 
   },
-  methods: {  
+  methods: {
+    onRecording() {
+      // recording
+      // create an audio file and put audio here.
+      this.recordingInProgress = true;
+    },
+    onRecordingStop() {
+      // stop recording
+      // try to set on upclick i.e hold to record
+      this.recordingInProgress = false;
+    },
+    clearChatHistory() {
+      // clears chat history
+    },
+    sendRecording(file) {
+      // send recent recording to chatgpt
+    },
+    getChatGPTResponse() {
+      // get response from chatgpt with fetch here
+      // also think of cleanup if chat is long audio logs will build up
+    },
     onResize() {
       this.windowWidth = window.innerWidth
     },
