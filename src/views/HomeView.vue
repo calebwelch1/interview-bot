@@ -66,7 +66,11 @@ export default {
     <div style=" background: #777069; display: flex; flex-direction: column; height: 100vh; overflow-y: scroll; overflow-x:hidden;">
       <div style="display:flex; height: 90%; width: 90%; margin-left: 5%; margin-top: 2.5%; gap: 2%;">
         <div class="flex-half">1</div>
-        <div class="flex-half">2</div>
+        <div class="flex-half">
+          <span class="material-symbols-outlined">
+            mic
+          </span>
+        </div>
 
       </div>
    </div>
@@ -90,6 +94,14 @@ a:visited {color:#777069;}
   flex: 30; background: #fff; width: 100%; height: 100%;
   display: flex; flex-direction: column;
   justify-content: flex-start; gap: 0;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 .portfolio-container {
