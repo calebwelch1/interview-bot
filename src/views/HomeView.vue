@@ -1,6 +1,65 @@
 <script lang="ts">
 import axios from 'axios'
 
+// const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
+// const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
+const soundClipsContainer: HTMLDivElement = document.querySelector(".sound-clips") as HTMLDivElement;
+
+let mediaRecorder: MediaRecorder | null = null;
+const chunks: Blob[] = [];
+
+// recordButton.addEventListener("click", startRecording);
+// stopButton.addEventListener("click", stopRecording);
+
+navigator.mediaDevices
+  .getUserMedia({ audio: true })
+  .then(function (stream) {
+    mediaRecorder = new MediaRecorder(stream);
+    console.log('made media recorder')
+    mediaRecorder.ondataavailable = function (event) {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = function () {
+      const audioBlob = new Blob(chunks, { type: "audio/wav" }); // You can change the type to "audio/mpeg" for MP3
+      const audioURL = window.URL.createObjectURL(audioBlob);
+      
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = audioURL;
+
+      const clipContainer = document.createElement("article");
+      clipContainer.appendChild(audio);
+      soundClipsContainer.appendChild(clipContainer);
+
+      chunks.length = 0; // Clear the chunks array
+    };
+  })
+  .catch(function (error) {
+    console.error("Error accessing the microphone:", error);
+  });
+
+// function startRecording() {
+//   if (mediaRecorder) {
+//     mediaRecorder.start();
+//     console.log("Recording started.");
+//     recordButton.disabled = true;
+//     stopButton.disabled = false;
+//   }
+// }
+
+// function stopRecording() {
+//   if (mediaRecorder && mediaRecorder.state === "recording") {
+//     mediaRecorder.stop();
+//     console.log("Recording stopped.");
+//     recordButton.disabled = false;
+//     stopButton.disabled = true;
+//   }
+// }
+
+
 interface MyObject {
     src: any;
     alt: string;
@@ -12,6 +71,8 @@ export default {
       windowWidth: window.innerWidth,
       currentArr: [] as MyObject[],
       recordingInProgress: false,
+      recordButton: null,
+      stopButton: null,
      }
   },
   mounted() {
@@ -20,14 +81,30 @@ export default {
     window.removeEventListener('resize', this.onResize); 
   },
   methods: {
-    onRecording() {
+    startRecording() {
+      const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
+      const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
       // recording
       // create an audio file and put audio here.
+        if (mediaRecorder) {
+        mediaRecorder.start();
+        console.log("Recording started.");
+        recordButton.disabled = true;
+        stopButton.disabled = false;
+      }
       this.recordingInProgress = true;
     },
-    onRecordingStop() {
+    stopRecording() {
+      const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
+      const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
       // stop recording
       // try to set on upclick i.e hold to record
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      console.log("Recording stopped.");
+      recordButton.disabled = false;
+      stopButton.disabled = true;
+    }
       this.recordingInProgress = false;
     },
     clearChatHistory() {
@@ -67,9 +144,13 @@ export default {
       <div style="display:flex; height: 90%; width: 90%; margin-left: 5%; margin-top: 2.5%; gap: 2%;">
         <div class="flex-half">1</div>
         <div class="flex-half">
+          <button class="record" @click="startRecording">
+            Record
           <span class="material-symbols-outlined">
             mic
           </span>
+          </button>
+          <button class="stop" @click="stopRecording">Stop recording</button>
         </div>
 
       </div>
