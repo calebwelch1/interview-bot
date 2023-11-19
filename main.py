@@ -4,6 +4,8 @@
 
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware 
+# CORS!
 from dotenv import load_dotenv
 
 import json
@@ -18,6 +20,15 @@ openai_orgkey = os.getenv("OPEN_AI_ORG")
 elevenlabs_key = os.getenv("ELEVENLABS_KEY")
 
 app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Replace with the actual origin of your client app
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # to run server
 # uvicorn main:app --reload
@@ -36,6 +47,10 @@ async def post_audio(file: UploadFile):
     user_message = transcribe_audio(file)
     chat_response = get_chat_response(user_message)
     audio_output = text_to_speech(chat_response)
+
+    logging.debug(f"Response status code: {response.status_code}")
+    logging.debug(f"Response content: {response.content}")
+
 
     def iterfile():  # 
         # with open(some_file_path, mode="rb") as file_like:  # 
@@ -62,6 +77,7 @@ def transcribe_audio(file):
     # if you don't add this response is unsubscriptable
     response_format="text"
     )
+    logging.debug(f"File name: {file.filename}")
     # hard code testing
     # transcript = {"role": "user", "content": "Who won world series in 2020?"}
     # print(transcript)

@@ -1,70 +1,6 @@
 <script lang="ts">
 import axios from 'axios'
 
-// const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
-// const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
-
-let mediaRecorder: MediaRecorder | null = null;
-const chunks: Blob[] = [];
-
-// recordButton.addEventListener("click", startRecording);
-// stopButton.addEventListener("click", stopRecording);
-
-navigator.mediaDevices
-  .getUserMedia({ audio: true })
-  .then(function (stream) {
-    mediaRecorder = new MediaRecorder(stream);
-    console.log('made media recorder')
-    mediaRecorder.ondataavailable = function (event) {
-      if (event.data.size > 0) {
-        chunks.push(event.data);
-      }
-    };
-
-    mediaRecorder.onstop = function () {
-      const audioBlob = new Blob(chunks, { type: "audio/wav" }); // You can change the type to "audio/mpeg" for MP3
-      const audioURL = window.URL.createObjectURL(audioBlob);
-      
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = audioURL;
-
-      const clipContainer = document.createElement("article");
-      clipContainer.appendChild(audio);
-      const soundClipsContainer: HTMLDivElement = document.querySelector(".sound-clips") as HTMLDivElement;
-      soundClipsContainer.appendChild(clipContainer);
-
-      chunks.length = 0; // Clear the chunks array
-    };
-  })
-  .catch(function (error) {
-    console.error("Error accessing the microphone:", error);
-  });
-
-// function startRecording() {
-//   if (mediaRecorder) {
-//     mediaRecorder.start();
-//     console.log("Recording started.");
-//     recordButton.disabled = true;
-//     stopButton.disabled = false;
-//   }
-// }
-
-// function stopRecording() {
-//   if (mediaRecorder && mediaRecorder.state === "recording") {
-//     mediaRecorder.stop();
-//     console.log("Recording stopped.");
-//     recordButton.disabled = false;
-//     stopButton.disabled = true;
-//   }
-// }
-
-
-interface MyObject {
-    src: any;
-    alt: string;
-  }
-
 export default {
   data() {
     return {
@@ -110,9 +46,10 @@ export default {
     clearChatHistory() {
       // clears chat history
     },
-    sendRecording(file) {
-      // send recent recording to chatgpt
-    },
+    // sendRecording(file) {
+    //   // send recent recording to chatgpt
+    //   console.log('sendRecording', file);
+    // },
     getChatGPTResponse() {
       // get response from chatgpt with fetch here
       // also think of cleanup if chat is long audio logs will build up
@@ -132,6 +69,99 @@ export default {
     }
   }
   };
+
+// const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
+// const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
+// recordButton.addEventListener("click", startRecording);
+// stopButton.addEventListener("click", stopRecording);
+function sendRecording(formData){
+  // axios.get('http://localhost:8000/talk')
+  //       .then(response => {
+  //         console.log(response.data);
+  //         // do something with response.data
+  //       })
+  //       .catch(error => {
+  //         console.error(error);
+  //       });
+
+  axios.post('http://localhost:8000/talk', formData)
+  .then(response => {
+    // Handle the response
+    console.log('Response:', response.data);
+  })
+  .catch(error => {
+    // Handle any errors
+    console.error('Error:', error);
+  });
+  // {
+  //   headers: {
+  //     'Content-Type': 'multipart/form-data', // Important: Set the content type to multipart/form-data
+  //   },
+  // })
+}
+
+let mediaRecorder: MediaRecorder | null = null;
+const chunks: Blob[] = [];
+navigator.mediaDevices
+  .getUserMedia({ audio: true })
+  .then(function (stream) {
+    mediaRecorder = new MediaRecorder(stream);
+    console.log('made media recorder')
+    mediaRecorder.ondataavailable = function (event) {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = function () {
+      const audioBlob = new Blob(chunks, { type: "audio/mpeg" }); // You can change the type to "audio/mpeg" for MP3
+      const audioURL = window.URL.createObjectURL(audioBlob);
+
+      const audioFile = new File([audioBlob], 'audio.mp3', { type: "audio/mpeg" });
+
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'audio.mp3'); 
+      // formData.append('audio', audioFile);
+      sendRecording(audioFile);
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = audioURL;
+
+      const clipContainer = document.createElement("article");
+      clipContainer.appendChild(audio);
+      const soundClipsContainer: HTMLDivElement = document.querySelector(".sound-clips") as HTMLDivElement;
+      soundClipsContainer.appendChild(clipContainer);
+
+      chunks.length = 0; // Clear the chunks array
+    };
+  })
+  .catch(function (error) {
+    console.error("Error accessing the microphone:", error);
+  });
+
+// function startRecording() {
+//   if (mediaRecorder) {
+//     mediaRecorder.start();
+//     console.log("Recording started.");
+//     recordButton.disabled = true;
+//     stopButton.disabled = false;
+//   }
+// }
+
+// function stopRecording() {
+//   if (mediaRecorder && mediaRecorder.state === "recording") {
+//     mediaRecorder.stop();
+//     console.log("Recording stopped.");
+//     recordButton.disabled = false;
+//     stopButton.disabled = true;
+//   }
+// }
+
+
+interface MyObject {
+    src: any;
+    alt: string;
+  }
 </script>
 
 <template>
