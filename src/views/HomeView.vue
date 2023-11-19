@@ -3,7 +3,6 @@ import axios from 'axios'
 
 // const recordButton: HTMLButtonElement = document.querySelector(".record") as HTMLButtonElement;
 // const stopButton: HTMLButtonElement = document.querySelector(".stop") as HTMLButtonElement;
-const soundClipsContainer: HTMLDivElement = document.querySelector(".sound-clips") as HTMLDivElement;
 
 let mediaRecorder: MediaRecorder | null = null;
 const chunks: Blob[] = [];
@@ -32,6 +31,7 @@ navigator.mediaDevices
 
       const clipContainer = document.createElement("article");
       clipContainer.appendChild(audio);
+      const soundClipsContainer: HTMLDivElement = document.querySelector(".sound-clips") as HTMLDivElement;
       soundClipsContainer.appendChild(clipContainer);
 
       chunks.length = 0; // Clear the chunks array
@@ -142,7 +142,9 @@ export default {
   <div class="portfolio-container">
     <div style=" background: #777069; display: flex; flex-direction: column; height: 100vh; overflow-y: scroll; overflow-x:hidden;">
       <div style="display:flex; height: 90%; width: 90%; margin-left: 5%; margin-top: 2.5%; gap: 2%;">
-        <div class="flex-half">1</div>
+        <div class="flex-half">
+            <div class="sound-clips"></div>
+        </div>
         <div class="flex-half">
           <button class="record" @click="startRecording">
             Record
